@@ -63,6 +63,7 @@ interface RunCliOptions {
   extraEnv?: Record<string, string | undefined>;
   bridge?: OpenCodeBridgeContext;
   abortSignal?: AbortSignal;
+  sessionId?: string;
 }
 
 interface RunCliResult {
@@ -96,6 +97,10 @@ export interface RecentAssistantMessage {
   messageId: string;
   text: string;
   timestamp?: string;
+}
+
+export function buildSessionContextEnv(sessionId: string | undefined): Record<string, string | undefined> {
+  return { PLANNOTATOR_SESSION_ID: sessionId || undefined };
 }
 
 function log(client: OpenCodeClient, level: LogLevel, message: string): void {
@@ -333,6 +338,7 @@ async function runPlannotatorCli(options: RunCliOptions): Promise<RunCliResult> 
     ...process.env,
     ...options.extraEnv,
     ...buildCliBridgeEnv(options.bridge),
+    ...buildSessionContextEnv(options.sessionId),
     OPENCODE: "1",
     PLANNOTATOR_ORIGIN: "opencode",
     PLANNOTATOR_CWD: cwd,
@@ -475,6 +481,7 @@ export async function runCliPlanReview(input: {
   timeoutSeconds: number | null;
   abortSignal?: AbortSignal;
   bridge?: OpenCodeBridgeContext;
+  sessionId: string;
 }): Promise<OpenCodePlanReviewResult> {
   const result = await runPlannotatorCli({
     client: input.client,
@@ -488,6 +495,7 @@ export async function runCliPlanReview(input: {
     readyLabel: "plan review",
     bridge: input.bridge,
     abortSignal: input.abortSignal,
+    sessionId: input.sessionId,
   });
 
   if (result.exitCode !== 0) {
@@ -643,6 +651,7 @@ export async function handleCliCommand(input: {
         }),
         readyLabel: "code review",
         bridge: input.bridge,
+        sessionId: input.sessionId,
       });
       if (result.exitCode !== 0) {
         log(input.client, "error", result.stderr.trim() || `Plannotator CLI exited with code ${result.exitCode}`);
@@ -682,6 +691,7 @@ export async function handleCliCommand(input: {
         cwd,
         readyLabel: "annotation UI",
         bridge: input.bridge,
+        sessionId: input.sessionId,
       });
       if (result.exitCode !== 0) {
         log(input.client, "error", result.stderr.trim() || `Plannotator CLI exited with code ${result.exitCode}`);
@@ -729,6 +739,7 @@ export async function handleCliCommand(input: {
         }),
         readyLabel: "annotation UI",
         bridge: input.bridge,
+        sessionId: input.sessionId,
       });
       if (result.exitCode !== 0) {
         log(input.client, "error", result.stderr.trim() || `Plannotator CLI exited with code ${result.exitCode}`);

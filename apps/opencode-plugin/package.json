@@ -1,18 +1,18 @@
 {
   "name": "@plannotator/opencode",
-  "version": "0.27.4",
+  "version": "0.27.4-atlas.1",
   "type": "module",
   "description": "Plannotator plugin for OpenCode - interactive plan review with visual annotation",
   "author": "backnotprop",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/backnotprop/plannotator.git",
+    "url": "git+https://github.com/colin-operations/plannotator.git",
     "directory": "apps/opencode-plugin"
   },
-  "homepage": "https://github.com/backnotprop/plannotator",
+  "homepage": "https://github.com/colin-operations/plannotator",
   "bugs": {
-    "url": "https://github.com/backnotprop/plannotator/issues"
+    "url": "https://github.com/colin-operations/plannotator/issues"
   },
   "keywords": [
     "opencode",

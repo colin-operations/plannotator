@@ -183,7 +183,7 @@ const serverPlugin = {
             directory,
             workflowOptions,
           }, {
-            reviewPlan: async ({ planContent }) => await runPlanReview({
+            reviewPlan: async ({ planContent, sessionId }) => await runPlanReview({
               client,
               runtime: workflowOptions.runtime,
               planContent,
@@ -193,6 +193,7 @@ const serverPlugin = {
               timeoutSeconds: getPlanTimeoutSeconds(),
               directory,
               bridge,
+              sessionId,
             }),
             resolveTargetAgent: async ({ requestedAgent }) => {
               const targetAgent = resolveTargetAgent(requestedAgent);
@@ -302,6 +303,7 @@ async function runPlanReview(input: {
   abortSignal?: AbortSignal;
   directory: string;
   bridge: OpenCodeBridgeContext;
+  sessionId: string;
 }): Promise<OpenCodePlanReviewResult> {
   if (input.runtime === "embedded" && !hasEmbeddedRuntime()) {
     throw new Error('runtime "embedded" requires a Bun-hosted OpenCode plugin runtime. Use runtime "auto" or "cli" with this OpenCode host.');
@@ -327,6 +329,7 @@ async function runPlanReview(input: {
         // which are HTTP surfaces separate from stderr, so V1 never repeats itself.
         // A real toast here needs an upstream OpenCode API that does not exist yet.
         logReady: () => {},
+        sessionId: input.sessionId,
       });
     } catch (error) {
       if (input.runtime === "embedded") throw error;
@@ -341,6 +344,7 @@ async function runPlanReview(input: {
     timeoutSeconds: input.timeoutSeconds,
     abortSignal: input.abortSignal,
     bridge: input.bridge,
+    sessionId: input.sessionId,
   });
 }
 

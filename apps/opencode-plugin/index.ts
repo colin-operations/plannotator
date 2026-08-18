@@ -151,6 +151,7 @@ type EmbeddedRuntimeModule = {
     timeoutSeconds: number | null;
     abortSignal: AbortSignal;
     logReady: (url: string, isRemote: boolean, port: number) => void;
+    sessionId: string;
   }) => Promise<OpenCodePlanReviewResult>;
   handleEmbeddedCommand: (
     command: string,
@@ -189,6 +190,7 @@ async function runPlanReview(input: {
   abortSignal: AbortSignal;
   cwd?: string;
   bridge: OpenCodeBridgeContext;
+  sessionId: string;
 }): Promise<OpenCodePlanReviewResult> {
   input.abortSignal.throwIfAborted();
   if (input.runtime === "embedded" && !hasEmbeddedRuntime()) {
@@ -208,6 +210,7 @@ async function runPlanReview(input: {
         timeoutSeconds: input.timeoutSeconds,
         abortSignal: input.abortSignal,
         logReady: (url) => logPlannotatorReady(input.client, "plan review", url),
+        sessionId: input.sessionId,
       });
     } catch (error) {
       input.abortSignal.throwIfAborted();
@@ -228,6 +231,7 @@ async function runPlanReview(input: {
     timeoutSeconds: input.timeoutSeconds,
     abortSignal: input.abortSignal,
     bridge: input.bridge,
+    sessionId: input.sessionId,
   });
 }
 
@@ -543,7 +547,7 @@ Do NOT proceed with implementation until your plan is approved.`;
             directory: ctx.directory,
             workflowOptions,
           }, {
-            reviewPlan: async ({ planContent }) => await runPlanReview({
+            reviewPlan: async ({ planContent, sessionId }) => await runPlanReview({
               client: ctx.client,
               runtime: workflowOptions.runtime,
               planContent,
@@ -555,6 +559,7 @@ Do NOT proceed with implementation until your plan is approved.`;
               abortSignal: context.abort,
               cwd: ctx.directory,
               bridge: await getBridgeContext(),
+              sessionId,
             }),
             resolveTargetAgent: async ({ requestedAgent, directory, delivery }) =>
               await resolveValidatedTargetAgent({

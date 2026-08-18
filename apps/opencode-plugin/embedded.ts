@@ -8,6 +8,7 @@ import {
   getAnnotateMessageFeedbackPrompt,
 } from "@plannotator/shared/prompts";
 import { deliverOpenCodePrompt } from "./prompt-delivery-error";
+import { createSessionBrowserOpener } from "./session-browser";
 
 export interface EmbeddedPlanReviewInput {
   client: any;
@@ -19,6 +20,7 @@ export interface EmbeddedPlanReviewInput {
   timeoutSeconds: number | null;
   abortSignal?: AbortSignal;
   logReady: (url: string, isRemote: boolean, port: number) => void;
+  sessionId: string;
 }
 
 export interface EmbeddedPlanReviewResult {
@@ -80,7 +82,9 @@ export async function runEmbeddedPlanReview(
     htmlContent: input.htmlContent,
     opencodeClient: input.client,
     onReady: async (url, isRemote, port) => {
-      await handleServerReady(url, isRemote, port);
+      await handleServerReady(url, isRemote, port, {
+        openBrowser: createSessionBrowserOpener(input.sessionId),
+      });
       input.logReady(url, isRemote, port);
     },
   });

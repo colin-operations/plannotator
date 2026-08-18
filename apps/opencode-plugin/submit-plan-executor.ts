@@ -42,6 +42,7 @@ export interface SubmitPlanHost {
   reviewPlan(input: {
     planContent: string;
     abortSignal?: AbortSignal;
+    sessionId: string;
   }): Promise<SubmitPlanReviewResult>;
   resolveTargetAgent(input: {
     requestedAgent?: string;
@@ -102,6 +103,7 @@ Use /plannotator-last or /plannotator-annotate for manual review, or set workflo
     reviewResult = await host.reviewPlan({
       planContent,
       abortSignal: invocation.abortSignal,
+      sessionId: invocation.sessionId,
     });
   } catch (error) {
     invocation.abortSignal?.throwIfAborted();

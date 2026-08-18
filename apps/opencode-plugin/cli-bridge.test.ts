@@ -8,6 +8,7 @@ import {
   buildCliBridgeEnv,
   buildCliSpawnConfig,
   buildReviewPromptFromBridgeOutcome,
+  buildSessionContextEnv,
   canLaunchGatedAnnotate,
   formatUserFacingCliStderrLine,
   getRecentAssistantMessages,
@@ -17,6 +18,15 @@ import { getReviewApprovedPrompt, getReviewDeniedSuffix } from "@plannotator/sha
 import { OpenCodePromptDeliveryError } from "./prompt-delivery-error";
 
 describe("OpenCode CLI bridge helpers", () => {
+  test("maps invocation-local session identity into child CLI env", () => {
+    expect(buildSessionContextEnv("session-123")).toEqual({
+      PLANNOTATOR_SESSION_ID: "session-123",
+    });
+    expect(buildSessionContextEnv(undefined)).toEqual({
+      PLANNOTATOR_SESSION_ID: undefined,
+    });
+  });
+
   test("maps OpenCode sharing context into child CLI env", () => {
     expect(buildCliBridgeEnv({
       sharingEnabled: false,

@@ -41,6 +41,7 @@ import { statSync } from "fs";
 import path from "path";
 import { resolveValidatedTargetAgent } from "./agent-switch";
 import { deliverOpenCodePrompt } from "./prompt-delivery-error";
+import { createSessionBrowserOpener } from "./session-browser";
 
 /** Shared dependencies injected by the plugin */
 export interface CommandDeps {
@@ -64,6 +65,8 @@ export async function handleReviewCommand(
   deps: CommandDeps
 ) {
   const { client, reviewHtmlContent, getSharingEnabled, getShareBaseUrl, directory } = deps;
+  // @ts-ignore - Event properties contain sessionID
+  const sessionId = event.properties?.sessionID;
 
   // @ts-ignore - Event properties contain arguments
   const reviewArgs = parseReviewArgs(event.properties?.arguments || "");
@@ -164,7 +167,9 @@ export async function handleReviewCommand(
     htmlContent: reviewHtmlContent,
     opencodeClient: client,
     onReady: (url, isRemote, port) => {
-      handleReviewServerReady(url, isRemote, port);
+      handleReviewServerReady(url, isRemote, port, {
+        openBrowser: createSessionBrowserOpener(sessionId),
+      });
       client.app.log({ level: "info", message: `[Plannotator] Open code review: ${url}` });
     },
   });
@@ -178,9 +183,6 @@ export async function handleReviewCommand(
   }
 
   if (result.feedback) {
-    // @ts-ignore - Event properties contain sessionID
-    const sessionId = event.properties?.sessionID;
-
     if (sessionId) {
       const targetAgent = await resolveValidatedTargetAgent({
         client,
@@ -387,7 +389,9 @@ export async function handleAnnotateCommand(
     agentCwd,
     htmlContent,
     onReady: (url, isRemote, port) => {
-      handleAnnotateServerReady(url, isRemote, port);
+      handleAnnotateServerReady(url, isRemote, port, {
+        openBrowser: createSessionBrowserOpener(sessionId),
+      });
       client.app.log({ level: "info", message: `[Plannotator] Open annotation UI: ${url}` });
     },
   });
@@ -504,7 +508,9 @@ export async function handleAnnotateLastCommand(
     approvalNotesSupported: true,
     htmlContent,
     onReady: (url, isRemote, port) => {
-      handleAnnotateServerReady(url, isRemote, port);
+      handleAnnotateServerReady(url, isRemote, port, {
+        openBrowser: createSessionBrowserOpener(sessionId),
+      });
       client.app.log({ level: "info", message: `[Plannotator] Open annotation UI: ${url}` });
     },
   });
